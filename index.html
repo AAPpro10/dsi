@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test DSI: PDF Completo</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --success: #16a34a;
+            --error: #dc2626;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Menu de Configuración */
+        .config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .config-btn {
+            padding: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .config-btn:hover {
+            border-color: var(--primary);
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .config-btn h3 {
+            margin: 0 0 5px 0;
+            color: var(--primary);
+        }
+
+        .config-btn p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .icon {
+            font-size: 2rem;
+            background: #eff6ff;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--primary);
+        }
+
+        /* Quiz Styles */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #6b7280;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .option-btn.correct {
+            background-color: #dcfce7;
+            border-color: var(--success);
+            color: #14532d;
+        }
+
+        .option-btn.incorrect {
+            background-color: #fee2e2;
+            border-color: var(--error);
+            color: #7f1d1d;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary);
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn.secondary {
+            background-color: #6b7280;
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Results Screen */
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0 auto 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Test DSI (PDF)</h1>
+        <div class="subtitle">Banco de preguntas extraído del documento PDF</div>
+    </header>
+
+    <div id="config-screen">
+        <p style="text-align: center; margin-bottom: 20px; font-size: 1.1rem;">Selecciona cómo quieres realizar el examen:</p>
+        
+        <div class="config-section">
+            <div class="config-btn" onclick="startQuiz('ordered')">
+                <div class="icon">📝</div>
+                <div>
+                    <h3>Orden Estándar</h3>
+                    <p>Preguntas y respuestas en el orden exacto del documento.</p>
+                </div>
+            </div>
+
+            <div class="config-btn" onclick="startQuiz('shuffle_q')">
+                <div class="icon">🔀</div>
+                <div>
+                    <h3>Preguntas Aleatorias</h3>
+                    <p>Las preguntas salen al azar. El orden de las respuestas (a, b, c) se mantiene fijo.</p>
+                </div>
+            </div>
+
+            <div class="config-btn" onclick="startQuiz('shuffle_all')">
+                <div class="icon">🎲</div>
+                <div>
+                    <h3>Todo Aleatorio (Modo Difícil)</h3>
+                    <p>Tanto las preguntas como las respuestas (a, b, c) se mezclan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quiz-screen" style="display: none;">
+        <div class="stats">
+            <span id="progress-text">Pregunta 1 de X</span>
+            <span id="score-text">Aciertos: 0</span>
+        </div>
+
+        <div id="question-container">
+            </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls">
+            <button class="btn secondary" onclick="goToMenu()">Salir</button>
+            <button id="next-btn" class="btn" onclick="nextQuestion()" disabled>Siguiente</button>
+        </div>
+    </div>
+
+    <div id="result-screen" style="display: none; text-align: center;">
+        <h2>¡Examen Finalizado!</h2>
+        <div class="score-circle" id="final-score">0%</div>
+        <p id="final-msg" style="font-size: 1.2rem; margin-bottom: 2rem;"></p>
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn" onclick="goToMenu()">Volver al Inicio</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATOS DEL PDF (Transcripción Exacta) ---
+    // NOTA: 'a' es el índice de la respuesta correcta (0=a, 1=b, 2=c).
+    const pdfData = [
+        { 
+            q: "1. El prototipado es una actividad de diseño clave para transformar ...", 
+            a: 0, 
+            opts: [
+                "...las suposiciones y requerimientos en una solución de diseño software.",
+                "...las suposiciones y requerimientos en varias soluciones de diseño software.",
+                "ninguna es correcta"
+            ] 
+        },
+        { 
+            q: "2. Indica la respuesta correcta:", 
+            a: 2, 
+            opts: [
+                "Todas las necesidades del usuario deben representarse en un diagrama de flujo de carril",
+                "Un diagrama de flujo es la representación visual de una serie de tareas o pasos de una tarea",
+                "Los diagramas de dependencias y de carril son los métodos más comunes para mostrar un flujo de tareas"
+            ] 
+        },
+        { 
+            q: "3. ¿Cuál de estas afirmaciones NO es correcta acerca de un Wireframe?", 
+            a: 0, 
+            opts: [
+                "Tiene un estilo narrativo digital.",
+                "Son diseños con un alto nivel de detalle",
+                "Normalmente se crea en el comienzo del proceso de diseño"
+            ] 
+        },
+        { 
+            q: "4. Indica qué no se tiene en consideración en el diseño visual", 
+            a: 1, 
+            opts: [
+                "Tipografía.",
+                "Interacción y patrones.",
+                "Branding"
+            ] 
+        },
+        { 
+            q: "5. El proceso de recogida de requisitos del software", 
+            a: 0, 
+            opts: [
+                "se produce en paralelo y es incompleto.",
+                "se produce en paralelo y es completo.",
+                "se produce en pila, es decir hasta que no acaba una tarea no se empieza con la siguiente."
+            ] 
+        },
+        { 
+            q: "6. ¿Cuál de estas directrices es una directriz para evitar problemas de usabilidad de tipo direccional?", 
+            a: 0, 
+            opts: [
+                "Ley de Fitt",
+                "Sensibilidad Internacional",
+                "Accesibilidad Universal"
+            ] 
+        },
+        { 
+            q: "7. ¿Quién son los destinatarios de un Storyboard?", 
+            a: 2, 
+            opts: [
+                "Los altos directivos de la empresa.",
+                "Los miembros del equipo de diseño interno.",
+                "Los clientes y usuarios finales."
+            ] 
+        },
+        { 
+            q: "8. Sobre el prototipado:", 
+            a: 0, 
+            opts: [
+                "Su propósito es la de obtener retroalimentación directa con el usuario final.",
+                "Existen prototipos de alta, baja calidad y horizontal/vertical en direccionalidad.",
+                "Un prototipo de baja calidad no sirve para conceptualizar el diseño de las páginas como posiciones, áreas, banners,..."
+            ] 
+        },
+        { 
+            q: "9. Indica la respuesta incorrecta de los Escenarios de Uso:", 
+            a: 0, 
+            opts: [
+                "Se realizan en la fase de verificación de requisitos.",
+                "Describen atributos específicos acerca de los usuarios, sus acciones, el entorno, las tareas diarias y las actividades.",
+                "Ayudan a definir con claridad el contexto del uso de un requisito"
+            ] 
+        },
+        { 
+            q: "10. ¿De estas opciones cual no es una técnica de revelación?", 
+            a: 0, 
+            opts: [
+                "Textos expandibles",
+                "Menús de comandos",
+                "Ventanas secundarias"
+            ] 
+        },
+        { 
+            q: "11. Desde la perspectiva del diseño y prototipado, los requisitos se pueden dividir en cuatro categorías principales:", 
+            a: 2, 
+            opts: [
+                "exploratorios, validación, negocios/ marketing y funcionales.",
+                "negocios/ marketing, funcionales y validación.",
+                "negocios/marketing, funcionales, técnicos y de usabilidad."
+            ] 
+        },
+        { 
+            q: "12. Sobre el branding:", 
+            a: 0, 
+            opts: [
+                "El logo, los colores, el eslogan y las guías de estilo si pertenecen al branding",
+                "El branding no fideliza a los seguidores de la marca.",
+                "El logo, los colores, el eslogan y las guías de estilo no pertenecen al branding"
+            ] 
+        },
+        { 
+            q: "13. Las suposiciones son esenciales para", 
+            a: 0, 
+            opts: [
+                "el proceso de prototipado.",
+                "el proceso de validación.",
+                "el proceso de evaluación."
+            ] 
+        },
+        { 
+            q: "14. ¿Cuál de estas respuestas no es una directriz del diseño?", 
+            a: 0, 
+            opts: [
+                "Ritmo y Movimiento",
+                "Agrupación lógica",
+                "Balance"
+            ] 
+        },
+        { 
+            q: "15. ¿Cuáles de las siguientes características se reflejan en un diagrama de Carril?", 
+            a: 1, 
+            opts: [
+                "Finalidad y Contenido",
+                "Tareas y roles",
+                "Requisitos funcionales"
+            ] 
+        },
+        { 
+            q: "16. En el modelo \"Mago de Oz\", es cierto que", 
+            a: 2, 
+            opts: [
+                "Se puede usar en cualquier etapa de diseño",
+                "El miembro del equipo de diseño debe acompañar al participante",
+                "Simula las respuestas del sistema"
+            ] 
+        },
+        { 
+            q: "17. En el diseño de la información, las técnicas de ajuste de la fidelidad son...", 
+            a: 0, 
+            opts: [
+                "Card Sorting, Prototipado Wireframe, Prototipado de alta fidelidad.",
+                "Card Sorting, Prototipado de alta fidelidad, Prototipado de baja fidelidad.",
+                "Card Sorting, Prototipado Wireframe, Prototipado de baja fidelidad."
+            ] 
+        },
+        { 
+            q: "18. ¿Los usuarios deben tener el control?", 
+            a: 1, 
+            opts: [
+                "Si, pero el sistema tendrá la decisión final en una situación crítica",
+                "Si, y deben sentir que controlan su interacción con el software",
+                "Ninguna de las anteriores es correcta."
+            ] 
+        },
+        { 
+            q: "19. Un prototipo sobredimensionado artificialmente es aquel en que...", 
+            a: 2, 
+            opts: [
+                "Conduce a tomar decisiones correctas en la fase de requisitos",
+                "Todas las anteriores respuestas son correctas.",
+                "Es aquel que conduce a tomar decisiones prematuras mostrando una alta fidelidad no apropiada"
+            ] 
+        },
+        { 
+            q: "20. El método Card Sorting", 
+            a: 2, 
+            opts: [
+                "Es un método abstracto, interactivo, participativo que se puede llevar a cabo tanto en las primeras etapas del proceso de software como en las finales.",
+                "Es un método abstracto, interactivo, participativo llevado a cabo en las últimas etapas del proceso de software",
+                "Es un método abstracto, interactivo, participativo llevado a cabo en las primeras etapas del proceso de software."
+            ] 
+        },
+        { 
+            q: "21. Los pasos para la creación de un flujo de tareas con un mapa de capas de tareas son los siguientes:", 
+            a: 2, 
+            opts: [
+                "Identificar dependencias - Eliminar dependencias redundantes - Crear lista de tareas y mostrar los elementos de la capa de tarea",
+                "Crear una lista de tareas - Mostrar los elementos de la capa de tareas - Identificar dependencias y eliminar dependencias redundantes",
+                "Crear una lista de tareas - Identificar dependencias - Mostrar elementos de la capa de tarea y Eliminar dependencias redundantes"
+            ] 
+        },
+        { 
+            q: "22. En el ciclo del prototipado efectivo...", 
+            a: 0, 
+            opts: [
+                "Es la mezcla justa de conceptos y de prototipo experimental",
+                "Es un proceso deductivo y no repetible, ya que depende de la pericia de los integrantes del grupo de desarrollo/diseño.",
+                "Se debe dar prioridad a la creencia del prototipado de alta fidelidad, ya que aporta un nivel de detalle muy próximo al producto real."
+            ] 
+        },
+        { 
+            q: "23. Dentro de la verificación de requerimientos, decimos que...", 
+            a: 1, 
+            opts: [
+                "Los requerimientos software y los del prototipado son los mismos, son procesos paralelos.",
+                "Los requerimientos del prototipo no son los mismo que los requerimientos del software.",
+                "Los requerimientos del prototipado nos muestran el estado final del prototipo"
+            ] 
+        },
+        { 
+            q: "24. Las subfases de la fase de Resultados son:", 
+            a: 1, 
+            opts: [
+                "Verificar requerimientos, determinar características y validar el diseño.",
+                "Revisar el diseño, validar el diseño y desplegar el diseño",
+                "Seleccionar el criterio de diseño, validar el diseño y desplegar el diseño."
+            ] 
+        },
+        { 
+            q: "25. ¿De qué subfases consta la fase 2 de Especificación?", 
+            a: 0, 
+            opts: [
+                "Determinar características, elegir el método y elegir la herramienta",
+                "Determinar características, elegir el método y definir el contenido/fidelidad",
+                "Todas las anteriores respuestas son correctas."
+            ] 
+        },
+        { 
+            q: "26. Las subfases en las que se divide la fase 1 del ciclo efectivo son:", 
+            a: 0, 
+            opts: [
+                "Verificar requerimientos, desarrollo del flujo de tareas y definir el contenido y la fidelidad.",
+                "Verificar requerimientos, desarrollo del flujo de tareas y crear el diseño",
+                "Determinación de características, desarrollo del flujo de tareas y definir el contenido y la fidelidad."
+            ] 
+        },
+        { 
+            q: "27. Las características a determinar en la fase de especificación son:", 
+            a: 1, 
+            opts: [
+                "Audiencia, estado, velocidad, Longevidad, Unidad y variedad. Estilo. Medio, Flujo de información",
+                "Audiencia, estado, velocidad, Longevidad, Expresión, Estilo, Medio, Fidelidad",
+                "Estructura tipográfica, estado, velocidad, Ritmo y patrón, Expresión, Estilo, Medio, Fidelidad"
+            ] 
+        },
+        { 
+            q: "28. Dentro de las guías visuales de diseño...", 
+            a: 2, 
+            opts: [
+                "En la organización basada en tablas nos garantizamos que el branding de la marca es respetado por la interfaz.",
+                "Todas las respuestas anteriores son correctas.",
+                "El flujo de información sirve para de ayuda para decidir dónde colocar los elementos en el diseño de la disposición de una interfaz"
+            ] 
+        },
+        { 
+            q: "29. En la fase de Especificación, decimos que...", 
+            a: 2, 
+            opts: [
+                "Se determina el qué dentro del ciclo de prototipado efectivo.",
+                "Se determina el cuándo dentro del ciclo de prototipado efectivo.",
+                "Se determina el cómo dentro del ciclo de prototipado efectivo."
+            ] 
+        },
+        { 
+            q: "30. En la revisión del diseño, dentro de la fase de resultados del prototipado, podemos afirmar que:", 
+            a: 0, 
+            opts: [
+                "Es una revisión interna, ya que irá enfocada al juicio de los miembros del equipo de desarrollo/diseño, altos directivos y analistas de mercado",
+                "Es una revisión interna, ya que irá enfocada al juicio de los clientes y usuarios finales",
+                "Es una revisión externa, ya que irá enfocada al juicio de los clientes y usuarios finales"
+            ] 
+        },
+        { 
+            q: "31. En la creación del prototipo, el ciclo de diseño y construcción consta de las siguientes fases:", 
+            a: 1, 
+            opts: [
+                "1 Determinar las pantallas de mayor prioridad, 2 Bloquear las regiones más importantes, 3 Layout de la pantalla con más alta prioridad,4 Especificar la lógica de diseño y 5 Disposición de pantallas prioritarias restantes.",
+                "1 Determinar las pantallas de mayor prioridad, 2 Bloquear las regiones más importantes, 3 Layout de la pantalla con más alta prioridad.4 Disposición de pantallas prioritarias restantes y 5 Especificar la lógica de diseño.",
+                "1 Determinar las pantallas de mayor prioridad, 2 Bloquear las regiones más importantes, 3 Disposición de pantallas prioritarias restantes, 4 Especificar la lógica de diseño y 5 Layout de la pantalla con más alta prioridad."
+            ] 
+        },
+        { 
+            q: "32. ¿Que fases comprende dentro de la revisión interna del diseño en el ciclo de prototipado?", 
+            a: 1, 
+            opts: [
+                "1. Definir el público objetivo, 2 Cómo se presentará y 3 Especificar la lógica de diseño, 4 Elegir el método y 5 Elegir la herramienta",
+                "1. Definir el público objetivo, 2 Conjunto de objetivos para cada versión, 3 Conjunto de expectativas de los revisores, 4 Cómo se presentará y 5 Especificar la lógica de diseño",
+                "1. Definir el público objetivo, 2 Conjunto de objetivos para cada versión, 3 Cómo se presentará y 4 Especificar la lógica de diseño"
+            ] 
+        },
+        { 
+            q: "33. ¿Qué acciones se deben seguir cuando el prototipo esté terminado?", 
+            a: 1, 
+            opts: [
+                "Normalmente el cliente se compromete a no realizar actualizaciones, y el equipo se encuentra exonerado de cualquier actualización posterior",
+                "Tendremos que tener en cuenta la opinión del diseño, la validación de la usabilidad, la iteración en la que nos encontramos y el ámbito de aplicación que tendrá el prototipo.",
+                "Todas las respuestas anteriores son incorrectas"
+            ] 
+        },
+        { 
+            q: "34. ¿Qué directrices forman parte de la guía de interfaz de usuario?", 
+            a: 0, 
+            opts: [
+                "Revelación progresiva, Rendimiento, Ley de Fitt, Facilidad de aprendizaje, Hablar el lenguaje de la audiencia, mostrar explícitamente las acciones y campos necesarios, sensibilidad internacional, accesibilidad universal, minimizar la carga cognitiva, el control debe tenerlo el usuario y satisfacción",
+                "Revelación progresiva, Rendimiento, Ley de Fitt, Facilidad de aprendizaje, Hablar el lenguaje de la audiencia, longevidad, velocidad, accesibilidad universal, organización basada en tablas, Flujo de información y satisfacción",
+                "Tan sólo el flujo de información y la Ley de Fitt determinan realmente las directrices que evitan problemas de usabilidad en la interfaz de usuario"
+            ] 
+        },
+        { 
+            q: "35. Dentro de la fase de Planificación del prototipo", 
+            a: 1, 
+            opts: [
+                "Todos los supuestos se transformarán en requerimientos.",
+                "No todos los supuestos podrán ser transformados en requerimientos, muchos podrán ser no validados.",
+                "Los supuestos son requerimientos y podrán ser utilizados dentro en el ciclo de Ingeniería del Software"
+            ] 
+        },
+        { 
+            q: "36. La facilidad de aprendizaje...", 
+            a: 0, 
+            opts: [
+                "Hace que el prototipo sea fácil de aprender y que el usuario sea capaz de utilizar los conocimientos actuales y adquiridos por el uso de la aplicación.",
+                "Es una directriz de las quías visuales",
+                "Nos proporciona información del uso que realiza el usuario de la interfaz"
+            ] 
+        },
+        { 
+            q: "37. En la elección de la herramienta de prototipado, es falso que...", 
+            a: 2, 
+            opts: [
+                "Deberemos utilizar herramientas de prototipado complementarias.",
+                "Trabajar con una sola herramienta no es eficiente",
+                "No pasa nada si sobrecargamos el diseño con demasiados detalles gracias a la herramienta elegida."
+            ] 
+        },
+        { 
+            q: "38. Podemos decir que un storyboard tiene...", 
+            a: 1, 
+            opts: [
+                "se representa de forma codificada y en él se articulan las necesidades de comercialización de negocios y se representa en forma de un escenario o historia de uso.",
+                "un estilo narrativo y se utiliza en las fases tempranas del proceso de diseño",
+                "Un estilo interactivo y se utiliza en las últimas fases del proceso de diseño"
+            ] 
+        },
+        { 
+            q: "39. Para validar los prototipos con los actores externos usaremos,", 
+            a: 1, 
+            opts: [
+                "Pruebas de usabilidad, test de accesibilidad y aplicaremos teoría del color.",
+                "Pruebas de Usabilidad, focus group y sesiones de evaluación",
+                "Aplicaremos los 10 principios de usabilidad de Jakob Nielsen"
+            ] 
+        },
+        { 
+            q: "40. Según la Ley de Fitt...", 
+            a: 2, 
+            opts: [
+                "Nos proporciona precisamente en que tiempo se puede alcanzar un objeto dependiendo de su tamaño y opacidad.",
+                "Nos proporciona precisamente en que tiempo se puede alcanzar un objeto dependiendo de su tamaño y color.",
+                "Nos proporciona precisamente en que tiempo se puede alcanzar un objeto dependiendo de su tamaño y lejanía."
+            ] 
+        },
+        { 
+            q: "41. En el diseño¿Cuáles son fases en la creación del prototipo?", 
+            a: 2, 
+            opts: [
+                "Determinar las pantallas de mayor prioridad, bloquear las regiones más importantes, disposición de pantallas prioritarias restantes y testing",
+                "Determinar las pantallas de mayor prioridad, bloquear las regiones más importantes, implementación, especificar la lógica de diseño y testing",
+                "Determinar las pantallas de mayor prioridad, bloquear las regiones más importantes, disposición de pantallas prioritarias restantes y layout de la pantalla con más alta prioridad"
+            ] 
+        },
+        { 
+            q: "42. ¿Cuales son métodos de especificación de un prototipo?", 
+            a: 1, 
+            opts: [
+                "Card Sorting, wireframe, storyboard y recorrido cognitivo",
+                "Card Sorting, wireframe, storyboard y modelo blanco",
+                "Card Sorting, heuristicas, storyboard y Mago de Oz"
+            ] 
+        },
+        { 
+            q: "43. Alguno de los métodos de evaluación que podemos encontrar para evaluar el diseño:", 
+            a: 1, 
+            opts: [
+                "Con modelos en blanco, pruebas de usabilidad, revisión heurística, revisiones externas y encuestas de satisfacción",
+                "Pruebas de usabilidad, revisiones externas, focus group, revisiones de pares, recorridos cognitivos, encuestas de satisfacción.",
+                "Pruebas de usabilidad, eyetracking, focus group, test A/B, revisiones de pares y recorridos cognitivos."
+            ] 
+        },
+        { 
+            q: "44. Antes de crear un prototipo de manera eficaz, la primera actividad es:", 
+            a: 0, 
+            opts: [
+                "Revisar el equilibrio entre las suposiciones y los requisitos, incluyendo los de negocios/marketing, funcionales, técnicos y de usabilidad.",
+                "Seleccionar inmediatamente la herramienta de software más avanzada para garantizar una alta fidelidad desde el principio.",
+                "Comenzar la codificación del sistema para tener una base sólida sobre la que diseñar la interfaz visual."
+            ] 
+        },
+        { 
+            q: "45. Dentro de las estrategias de distribución del prototipo, nos encontramos con:", 
+            a: 1, 
+            opts: [
+                "Alta fidelidad, media fidelidad y baja fidelidad.",
+                "Narrativo, interactivo, abierto y cerrado.",
+                "Interno, externo, temprano y tardío."
+            ] 
+        },
+        { 
+            q: "46. Podemos definir un diagrama de carril como:",
+            a: 2, 
+            opts: [
+                "La representación visual de una serie de tareas o los pasos de una tarea sin asignar roles específicos.",
+                "La narración de un flujo de tareas en un contexto específico, como un incidente crítico o una historia cotidiana.",
+                "Todas las respuestas anteriores son incorrectas."
+            ] 
+        },
+        { 
+            q: "47. ¿Cuáles son las principales consideraciones del diseño visual?:", 
+            a: 0, 
+            opts: [
+                "Layout, tipografía, elementos gráficos, selección de fuentes, esquema de color y branding.",
+                "La arquitectura de la base de datos, el lenguaje de programación backend y los protocolos de seguridad.",
+                "La identificación de los roles de usuario, los puntos de interacción y los medios de colaboración en el flujo de trabajo."
+            ] 
+        },
+        { 
+            q: "48. ¿Qué es un modelo en blanco?", 
+            a: 1, 
+            opts: [
+                "Un método que permite a un equipo realizar una prueba experimental simulando las respuestas del sistema (Mago de Oz).",
+                "Un prototipo interactivo creado con lenguaje de programación o scripting como Java.",
+                "Todas las respuestas anteriores son incorrectas."
+            ] 
+        },
+        { 
+            q: "49. La directriz ritmo y patron", 
+            a: 1, 
+            opts: [
+                "Guia al usuario hacia donde debe poner el foco de la informacion importante.",
+                "El primero marca la periodicidad o flujo de los elementos y el segundo la repetición que implica la duplicación de un módulo espaciado.",
+                "Nos ayuda en marcar la periodicidad o flujo de los elementos y en la consistencia de un módulo específico."
+            ] 
+        },
+        { 
+            q: "50. El balance es una directriz que...", 
+            a: 0, 
+            opts: [
+                "Aporta equilibrio entre contraste, opuesto, o intercacción entre elementos.",
+                "Aporta equilibrio entre elementos esteticamente discordantes y con balance asimetrico.",
+                "Ayuda a mejorar el balance de los elementos en la disposicion de grid."
+            ] 
+        },
+        { 
+            q: "51. Dentro de balance podemos encontrar con...", 
+            a: 0, 
+            opts: [
+                "Diseños simétricos con un eje central que organiza los elementos de la interfaz, con desigual importancia, a los dos lados de la pantalla.",
+                "Diseños asimétricos que pueden ser válidos si el que menor peso visual tiene aporta mayor información al usuario",
+                "Se encarga de controlar el flujo de la información a los dos lados de la pantalla si trazáramos un eje imaginario"
+            ] 
+        },
+        { 
+            q: "52. ¿Qué es la revelación progresiva?", 
+            a: 0, 
+            opts: [
+                "Es una técnica para prevenir de la sobreexposición al usuario de la información.",
+                "Técnica que se encarga de revelar una estructura no visible para minimizar el scroll vertical",
+                "En presentación simples es una técnica comúnmente utilizada."
+            ] 
+        },
+        { 
+            q: "53. ¿Qué fases son importantes en el despliegue del diseño?", 
+            a: 1, 
+            opts: [
+                "Establecer expectativas para transferencia y documentar los resultados del prototipo",
+                "Establecer expectativas para transferencia, estrategias de distribución del prototipo y documentar los resultados del prototipo",
+                "Diseñar el flujo de la presentación, estrategias de distribución del prototipo y documentar los resultados del prototipo"
+            ] 
+        },
+        { 
+            q: "54. ¿Qué proporciona una prueba de concepto?", 
+            a: 1, 
+            opts: [
+                "Al poder probar de forma interna el prototipo, antes de la producción, el riesgo aumenta para el usuario externo",
+                "Al poder probar de forma interna y externa el prototipo, antes de la producción, el riesgo se reduce",
+                "Ninguna es correcta"
+            ] 
+        }
+    ];
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // Elementos DOM
+    const configScreen = document.getElementById('config-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const questionContainer = document.getElementById('question-container');
+    const nextBtn = document.getElementById('next-btn');
+    const feedbackDiv = document.getElementById('feedback');
+    const progressText = document.getElementById('progress-text');
+    const scoreText = document.getElementById('score-text');
+
+    function startQuiz(mode) {
+        // Clonar datos para no mutar el original
+        let questionsToLoad = JSON.parse(JSON.stringify(pdfData));
+
+        if (mode === 'ordered') {
+            // No hacemos nada, orden original
+        } 
+        else if (mode === 'shuffle_q') {
+            // Solo mezclamos el orden de las preguntas
+            questionsToLoad.sort(() => Math.random() - 0.5);
+        } 
+        else if (mode === 'shuffle_all') {
+            // Mezclamos preguntas
+            questionsToLoad.sort(() => Math.random() - 0.5);
+            
+            // Mezclamos respuestas dentro de cada pregunta
+            questionsToLoad.forEach(q => {
+                // Crear array temporal de objetos para mantener el rastro de la correcta
+                let optionsWithIndex = q.opts.map((optText, index) => ({
+                    text: optText,
+                    isCorrect: index === q.a
+                }));
+
+                // Barajar opciones
+                optionsWithIndex.sort(() => Math.random() - 0.5);
+
+                // Reasignar texto y nuevo índice correcto
+                q.opts = optionsWithIndex.map(o => o.text);
+                q.a = optionsWithIndex.findIndex(o => o.isCorrect);
+            });
+        }
+
+        currentQuestions = questionsToLoad;
+        currentQuestionIndex = 0;
+        score = 0;
+
+        configScreen.style.display = 'none';
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = currentQuestions[currentQuestionIndex];
+        
+        // Stats
+        progressText.textContent = `Pregunta ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+        scoreText.textContent = `Aciertos: ${score}`;
+
+        // Reset UI
+        feedbackDiv.style.display = 'none';
+        nextBtn.disabled = true;
+
+        // Render HTML
+        let html = `
+            <div class="question-text">${qData.q}</div>
+            <div class="options">
+        `;
+
+        qData.opts.forEach((opt, index) => {
+            const letter = String.fromCharCode(97 + index); // a, b, c
+            html += `<button class="option-btn" onclick="checkAnswer(${index}, this)">${letter}) ${opt}</button>`;
+        });
+
+        html += `</div>`;
+        questionContainer.innerHTML = html;
+    }
+
+    window.checkAnswer = function(selectedIndex, btnElement) {
+        const qData = currentQuestions[currentQuestionIndex];
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        allBtns.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === qData.a) {
+            btnElement.classList.add('correct');
+            score++;
+            scoreText.textContent = `Aciertos: ${score}`;
+            feedbackDiv.innerHTML = `<strong>¡Correcto!</strong>`;
+            feedbackDiv.style.borderColor = 'var(--success)';
+            feedbackDiv.style.backgroundColor = '#dcfce7';
+        } else {
+            btnElement.classList.add('incorrect');
+            allBtns[qData.a].classList.add('correct');
+            // Nota: Usamos letras minúsculas a,b,c para coincidir con el PDF
+            const correctLetter = String.fromCharCode(97 + qData.a);
+            feedbackDiv.innerHTML = `<strong>Incorrecto.</strong> La correcta era: <strong>${correctLetter})</strong>`;
+            feedbackDiv.style.borderColor = 'var(--error)';
+            feedbackDiv.style.backgroundColor = '#fee2e2';
+        }
+
+        feedbackDiv.style.display = 'block';
+        nextBtn.disabled = false;
+    }
+
+    window.nextQuestion = function() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        
+        const percentage = Math.round((score / currentQuestions.length) * 100);
+        document.getElementById('final-score').textContent = `${percentage}%`;
+        
+        let msg = "";
+        if (percentage >= 90) msg = "¡Excelente! Has dominado el documento.";
+        else if (percentage >= 70) msg = "¡Buen trabajo! Vas bien preparado.";
+        else if (percentage >= 50) msg = "Aprobado justo. Conviene repasar.";
+        else msg = "Necesitas repasar más el PDF. ¡Ánimo!";
+        
+        document.getElementById('final-msg').textContent = msg;
+    }
+
+    window.goToMenu = function() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'none';
+        configScreen.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
